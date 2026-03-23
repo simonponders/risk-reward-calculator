@@ -1,0 +1,1517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Coinfello — Risk/Reward Intelligence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #060810;
+    --bg2: #0c1020;
+    --bg3: #111827;
+    --gold: #F0B429;
+    --gold2: #FFD97D;
+    --teal: #00E5C4;
+    --red: #FF4D6D;
+    --muted: #3a4460;
+    --text: #E8EDF5;
+    --text2: #8892A8;
+    --border: rgba(240,180,41,0.18);
+    --glow: rgba(240,180,41,0.12);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    overflow-x: hidden;
+    cursor: default;
+  }
+
+  /* ─── NOISE OVERLAY ─── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 999;
+    opacity: 0.6;
+  }
+
+  /* ─── NAV ─── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 48px;
+    background: linear-gradient(to bottom, rgba(6,8,16,0.95), transparent);
+    backdrop-filter: blur(4px);
+  }
+
+  .logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 3px;
+    color: var(--gold);
+    text-decoration: none;
+  }
+  .logo span { color: var(--text2); font-size: 11px; font-family: 'Space Mono', monospace; display: block; letter-spacing: 2px; margin-top: -4px; }
+
+  .nav-links { display: flex; gap: 32px; align-items: center; }
+  .nav-links a { color: var(--text2); text-decoration: none; font-size: 13px; letter-spacing: 0.5px; transition: color 0.2s; }
+  .nav-links a:hover { color: var(--gold); }
+  .nav-cta {
+    background: var(--gold);
+    color: #000;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 1px;
+    padding: 10px 22px;
+    text-decoration: none;
+    text-transform: uppercase;
+    transition: all 0.2s;
+  }
+  .nav-cta:hover { background: var(--gold2); transform: translateY(-1px); }
+
+  /* ─── HERO ─── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 120px 48px 60px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-grid-bg {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(240,180,41,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(240,180,41,0.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+    mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 40%, transparent 100%);
+  }
+
+  .hero-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(120px);
+    pointer-events: none;
+  }
+  .orb1 { width: 600px; height: 600px; background: rgba(240,180,41,0.08); top: -100px; right: -100px; }
+  .orb2 { width: 400px; height: 400px; background: rgba(0,229,196,0.06); bottom: 0; left: 200px; }
+
+  .hero-eyebrow {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--teal);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .hero-eyebrow::before {
+    content: '';
+    width: 32px; height: 1px;
+    background: var(--teal);
+  }
+
+  h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(64px, 9vw, 130px);
+    line-height: 0.92;
+    letter-spacing: 2px;
+    max-width: 900px;
+    margin-bottom: 28px;
+  }
+  h1 .gold { color: var(--gold); }
+  h1 .outline {
+    -webkit-text-stroke: 1px var(--text);
+    color: transparent;
+  }
+
+  .hero-sub {
+    max-width: 520px;
+    color: var(--text2);
+    font-size: 17px;
+    line-height: 1.65;
+    margin-bottom: 44px;
+    font-weight: 300;
+  }
+
+  .hero-actions { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+  .btn-primary {
+    background: var(--gold);
+    color: #000;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 1.5px;
+    padding: 16px 36px;
+    text-decoration: none;
+    text-transform: uppercase;
+    transition: all 0.25s;
+    display: inline-block;
+  }
+  .btn-primary:hover { background: var(--gold2); transform: translateY(-2px); box-shadow: 0 12px 40px rgba(240,180,41,0.3); }
+  .btn-secondary {
+    border: 1px solid var(--muted);
+    color: var(--text2);
+    font-size: 13px;
+    letter-spacing: 1px;
+    padding: 15px 32px;
+    text-decoration: none;
+    transition: all 0.25s;
+    display: inline-block;
+    text-transform: uppercase;
+  }
+  .btn-secondary:hover { border-color: var(--gold); color: var(--gold); }
+
+  .hero-stats {
+    display: flex;
+    gap: 48px;
+    margin-top: 72px;
+    padding-top: 32px;
+    border-top: 1px solid var(--border);
+  }
+  .stat-item { }
+  .stat-val { font-family: 'Bebas Neue', sans-serif; font-size: 36px; color: var(--gold); letter-spacing: 1px; }
+  .stat-label { font-family: 'Space Mono', monospace; font-size: 10px; color: var(--text2); letter-spacing: 2px; text-transform: uppercase; margin-top: 2px; }
+
+  /* ─── SECTION SHARED ─── */
+  section { padding: 100px 48px; position: relative; }
+
+  .section-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(40px, 5vw, 72px);
+    letter-spacing: 1px;
+    line-height: 1;
+    margin-bottom: 16px;
+  }
+
+  /* ─── GRAPH SECTION ─── */
+  #calculator {
+    background: var(--bg2);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .calc-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 48px;
+    flex-wrap: wrap;
+    gap: 24px;
+  }
+
+  .calc-header p {
+    color: var(--text2);
+    font-size: 15px;
+    line-height: 1.6;
+    max-width: 420px;
+    font-weight: 300;
+  }
+
+  .graph-wrapper {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 40px;
+    align-items: start;
+  }
+
+  .graph-container {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    padding: 40px;
+    position: relative;
+  }
+
+  canvas#riskChart {
+    width: 100% !important;
+    cursor: crosshair;
+  }
+
+  .graph-legend {
+    display: flex;
+    gap: 24px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+  }
+  .legend-item { display: flex; align-items: center; gap: 8px; font-family: 'Space Mono', monospace; font-size: 11px; color: var(--text2); }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+  /* ─── SIDEBAR PANEL ─── */
+  .sidebar-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .panel-card {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    padding: 24px;
+  }
+
+  .panel-card h4 {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 16px;
+  }
+
+  /* Asset selector */
+  .asset-select-group { display: flex; flex-direction: column; gap: 8px; }
+  .asset-btn {
+    background: transparent;
+    border: 1px solid var(--muted);
+    color: var(--text2);
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    padding: 10px 14px;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.2s;
+    letter-spacing: 0.5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .asset-btn:hover { border-color: var(--gold); color: var(--gold); }
+  .asset-btn.active { border-color: var(--gold); background: rgba(240,180,41,0.08); color: var(--gold); }
+  .asset-btn .badge {
+    font-size: 9px;
+    padding: 2px 7px;
+    border: 1px solid currentColor;
+    opacity: 0.8;
+  }
+
+  /* Rating display */
+  .rating-display {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .rating-pill {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    padding: 6px 12px;
+    border: 1px solid var(--muted);
+    color: var(--text2);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .rating-pill:hover { border-color: var(--gold); color: var(--gold); }
+  .rating-pill.aaa { border-color: var(--teal); color: var(--teal); background: rgba(0,229,196,0.08); }
+  .rating-pill.aa  { border-color: #7EE8A2; color: #7EE8A2; background: rgba(126,232,162,0.06); }
+  .rating-pill.a   { border-color: #A8E6B0; color: #A8E6B0; background: rgba(168,230,176,0.05); }
+  .rating-pill.bbb { border-color: var(--gold); color: var(--gold); background: rgba(240,180,41,0.07); }
+  .rating-pill.bb  { border-color: #FF9F1C; color: #FF9F1C; background: rgba(255,159,28,0.07); }
+  .rating-pill.b   { border-color: var(--red); color: var(--red); background: rgba(255,77,109,0.07); }
+
+  /* Yield range */
+  .yield-range {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+  .yield-input {
+    flex: 1;
+    background: var(--bg);
+    border: 1px solid var(--muted);
+    color: var(--text);
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    padding: 10px 14px;
+    outline: none;
+    transition: border 0.2s;
+    width: 100%;
+  }
+  .yield-input:focus { border-color: var(--gold); }
+  .yield-sep { color: var(--muted); font-size: 12px; }
+
+  .add-btn {
+    width: 100%;
+    background: var(--gold);
+    color: #000;
+    border: none;
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 8px;
+  }
+  .add-btn:hover { background: var(--gold2); }
+
+  /* Tooltip */
+  .graph-tooltip {
+    position: fixed;
+    background: var(--bg3);
+    border: 1px solid var(--gold);
+    padding: 14px 18px;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    pointer-events: none;
+    display: none;
+    z-index: 200;
+    min-width: 180px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+  }
+  .tooltip-name { color: var(--gold); font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+  .tooltip-row { display: flex; justify-content: space-between; gap: 20px; color: var(--text2); margin-top: 4px; }
+  .tooltip-row span:last-child { color: var(--text); }
+
+  /* ─── RISK DIMENSIONS ─── */
+  #risk-dimensions {
+    background: var(--bg);
+  }
+
+  .dimensions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 2px;
+    margin-top: 56px;
+  }
+
+  .dim-card {
+    background: var(--bg2);
+    padding: 40px 32px;
+    border: 1px solid transparent;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+  .dim-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--gold);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.4s;
+  }
+  .dim-card:hover { border-color: var(--border); }
+  .dim-card:hover::before { transform: scaleX(1); }
+
+  .dim-number {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 72px;
+    color: rgba(240,180,41,0.08);
+    line-height: 1;
+    position: absolute;
+    top: 16px;
+    right: 24px;
+  }
+
+  .dim-icon {
+    width: 44px; height: 44px;
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    margin-bottom: 20px;
+  }
+
+  .dim-card h3 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 26px;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+    color: var(--text);
+  }
+
+  .dim-card p {
+    color: var(--text2);
+    font-size: 14px;
+    line-height: 1.65;
+    font-weight: 300;
+    margin-bottom: 20px;
+  }
+
+  .dim-signals { list-style: none; }
+  .dim-signals li {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--text2);
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    display: flex;
+    gap: 8px;
+  }
+  .dim-signals li::before { content: '›'; color: var(--gold); }
+
+  /* ─── YIELD STRATEGIES ─── */
+  #yield-strategies {
+    background: var(--bg2);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .strategy-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin-top: 56px;
+  }
+
+  .strategy-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    padding: 36px 28px;
+    transition: all 0.3s;
+    position: relative;
+  }
+  .strategy-card:hover { transform: translateY(-4px); box-shadow: 0 16px 48px rgba(0,0,0,0.4); }
+
+  .strategy-type {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--teal);
+    margin-bottom: 12px;
+  }
+
+  .strategy-card h3 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 32px;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+  }
+
+  .apy-badge {
+    display: inline-block;
+    background: rgba(240,180,41,0.1);
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    padding: 6px 14px;
+    margin-bottom: 20px;
+  }
+
+  .strategy-card p {
+    color: var(--text2);
+    font-size: 14px;
+    line-height: 1.6;
+    font-weight: 300;
+    margin-bottom: 24px;
+  }
+
+  .protocol-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+  .protocol-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    padding: 5px 10px;
+    border: 1px solid var(--muted);
+    color: var(--text2);
+    text-decoration: none;
+    transition: all 0.2s;
+    letter-spacing: 0.5px;
+  }
+  .protocol-tag:hover { border-color: var(--teal); color: var(--teal); }
+
+  /* ─── MACRO SECTION ─── */
+  #macro {
+    background: var(--bg);
+  }
+
+  .macro-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2px;
+    margin-top: 56px;
+  }
+
+  .macro-card {
+    background: var(--bg2);
+    padding: 36px;
+    position: relative;
+    border: 1px solid transparent;
+    transition: border 0.3s;
+  }
+  .macro-card:hover { border-color: var(--border); }
+
+  .macro-indicator {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .macro-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .macro-dot.positive { background: var(--teal); box-shadow: 0 0 8px var(--teal); }
+  .macro-dot.negative { background: var(--red); box-shadow: 0 0 8px var(--red); }
+  .macro-dot.neutral  { background: var(--gold); box-shadow: 0 0 8px var(--gold); }
+
+  .macro-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--text2);
+    text-transform: uppercase;
+  }
+
+  .macro-card h3 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 1px;
+    margin-bottom: 14px;
+  }
+
+  .macro-card p {
+    color: var(--text2);
+    font-size: 14px;
+    line-height: 1.65;
+    font-weight: 300;
+  }
+
+  .macro-impact {
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
+  }
+  .impact-label { color: var(--text2); text-transform: uppercase; }
+  .impact-val { color: var(--text); }
+  .impact-arrow { font-size: 14px; }
+  .impact-arrow.up { color: var(--teal); }
+  .impact-arrow.down { color: var(--red); }
+  .impact-arrow.side { color: var(--gold); }
+
+  /* ─── TRADING TOOLS ─── */
+  #trading-tools { background: var(--bg2); border-top: 1px solid var(--border); }
+
+  .tools-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-top: 56px;
+  }
+
+  .tool-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    padding: 40px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s;
+  }
+  .tool-card:hover { border-color: rgba(240,180,41,0.4); }
+
+  .tool-card .watermark {
+    position: absolute;
+    bottom: -20px;
+    right: -10px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 100px;
+    color: rgba(255,255,255,0.02);
+    pointer-events: none;
+    letter-spacing: 2px;
+  }
+
+  .tool-type {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  .tool-card h3 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 40px;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+  }
+
+  .tool-card p {
+    color: var(--text2);
+    font-size: 14px;
+    line-height: 1.65;
+    font-weight: 300;
+    margin-bottom: 28px;
+  }
+
+  .risk-default {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255,77,109,0.08);
+    border: 1px solid rgba(255,77,109,0.3);
+    padding: 8px 16px;
+    margin-bottom: 24px;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--red);
+  }
+
+  .tool-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--gold);
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 1px;
+    text-decoration: none;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--gold);
+    padding-bottom: 2px;
+    transition: all 0.2s;
+  }
+  .tool-link:hover { color: var(--gold2); border-color: var(--gold2); }
+
+  /* ─── CTA SECTION ─── */
+  #signup {
+    background: var(--bg);
+    border-top: 1px solid var(--border);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    padding: 120px 48px;
+  }
+
+  #signup .orb-cta {
+    position: absolute;
+    width: 800px; height: 800px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(240,180,41,0.07) 0%, transparent 70%);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+
+  #signup .section-label { justify-content: center; display: flex; }
+  #signup h2 { max-width: 700px; margin: 0 auto 16px; }
+  #signup .sub {
+    color: var(--text2);
+    font-size: 17px;
+    font-weight: 300;
+    max-width: 520px;
+    margin: 0 auto 48px;
+    line-height: 1.65;
+  }
+
+  .signup-form {
+    display: flex;
+    gap: 0;
+    max-width: 480px;
+    margin: 0 auto 48px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .signup-form input {
+    flex: 1;
+    background: var(--bg2);
+    border: 1px solid var(--muted);
+    border-right: none;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    padding: 16px 20px;
+    outline: none;
+    transition: border 0.2s;
+  }
+  .signup-form input:focus { border-color: var(--gold); }
+  .signup-form input::placeholder { color: var(--muted); }
+
+  .signup-form button {
+    background: var(--gold);
+    color: #000;
+    border: none;
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 16px 28px;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .signup-form button:hover { background: var(--gold2); }
+
+  .signup-features {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    flex-wrap: wrap;
+    position: relative;
+    z-index: 2;
+  }
+  .signup-feature {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--text2);
+    letter-spacing: 0.5px;
+  }
+  .signup-feature::before { content: '✦'; color: var(--gold); font-size: 8px; }
+
+  .agent-prompt {
+    max-width: 760px;
+    margin: 72px auto 0;
+    padding: 36px 40px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    position: relative;
+    z-index: 2;
+    text-align: left;
+  }
+
+  .agent-prompt .terminal-bar {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 24px;
+  }
+  .terminal-bar span {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--muted);
+  }
+  .terminal-bar span:first-child { background: var(--red); }
+  .terminal-bar span:nth-child(2) { background: var(--gold); }
+  .terminal-bar span:nth-child(3) { background: var(--teal); }
+
+  .terminal-line {
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    line-height: 1.8;
+    color: var(--text2);
+    margin-bottom: 6px;
+  }
+  .terminal-line .prompt { color: var(--gold); }
+  .terminal-line .output { color: var(--text); }
+  .terminal-line .cursor { display: inline-block; width: 8px; height: 14px; background: var(--teal); vertical-align: middle; animation: blink 1s step-end infinite; }
+
+  @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+  .agent-cta-row {
+    margin-top: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  .agent-cta-row p {
+    color: var(--text2);
+    font-size: 14px;
+    font-weight: 300;
+    line-height: 1.5;
+  }
+  .agent-cta-row p strong { color: var(--text); font-weight: 500; }
+
+  /* ─── FOOTER ─── */
+  footer {
+    background: var(--bg2);
+    border-top: 1px solid var(--border);
+    padding: 40px 48px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  footer .logo { font-size: 20px; }
+  footer p { font-family: 'Space Mono', monospace; font-size: 10px; color: var(--text2); letter-spacing: 1px; }
+  footer .disclaimer { font-size: 10px; color: var(--muted); font-family: 'Space Mono', monospace; max-width: 500px; line-height: 1.6; }
+
+  /* ─── SCROLL ANIMATION ─── */
+  .fade-up { opacity: 0; transform: translateY(30px); transition: opacity 0.7s, transform 0.7s; }
+  .fade-up.visible { opacity: 1; transform: translateY(0); }
+
+  /* ─── TICKER ─── */
+  .ticker-bar {
+    background: rgba(240,180,41,0.05);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 0;
+    overflow: hidden;
+    white-space: nowrap;
+    margin-top: 80px;
+  }
+  .ticker-track {
+    display: inline-block;
+    animation: ticker 30s linear infinite;
+  }
+  .ticker-item {
+    display: inline-block;
+    margin: 0 32px;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 1px;
+    color: var(--text2);
+  }
+  .ticker-item .up { color: var(--teal); }
+  .ticker-item .dn { color: var(--red); }
+  @keyframes ticker { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+
+  @media (max-width: 900px) {
+    nav { padding: 16px 24px; }
+    .nav-links { display: none; }
+    section { padding: 72px 24px; }
+    .hero { padding: 100px 24px 60px; }
+    .graph-wrapper { grid-template-columns: 1fr; }
+    .strategy-grid { grid-template-columns: 1fr; }
+    .macro-grid { grid-template-columns: 1fr; }
+    .tools-grid { grid-template-columns: 1fr; }
+    .hero-stats { gap: 24px; flex-wrap: wrap; }
+    .signup-form { flex-direction: column; }
+    .signup-form input { border-right: 1px solid var(--muted); border-bottom: none; }
+    footer { flex-direction: column; align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="logo">COINFELLO<span>WHITE GLOVE CRYPTO INTELLIGENCE</span></a>
+  <div class="nav-links">
+    <a href="#calculator">Calculator</a>
+    <a href="#risk-dimensions">Risk Ratings</a>
+    <a href="#yield-strategies">Yield</a>
+    <a href="#macro">Macro</a>
+    <a href="#signup" class="nav-cta">Get Started</a>
+  </div>
+</nav>
+
+<!-- TICKER -->
+<div class="ticker-bar" style="margin-top:0; position:fixed; top:0; z-index:99; width:100%">
+  <div class="ticker-track" id="tickerTrack"></div>
+</div>
+
+<!-- HERO -->
+<section class="hero" style="padding-top: 140px;">
+  <div class="hero-grid-bg"></div>
+  <div class="hero-orb orb1"></div>
+  <div class="hero-orb orb2"></div>
+
+  <div class="hero-eyebrow">Risk / Reward Intelligence</div>
+  <h1>KNOW YOUR<br><span class="gold">RISK.</span><br><span class="outline">KNOW YOUR</span><br>RETURN.</h1>
+  <p class="hero-sub">Coinfello quantifies crypto risk across liquidity, seniorage, MEV, and dilution — then matches it to real yield. From staking to perps, we help you position with precision.</p>
+  <div class="hero-actions">
+    <a href="#calculator" class="btn-primary">Launch Calculator</a>
+    <a href="#signup" class="btn-secondary">Meet Your Agent →</a>
+  </div>
+  <div class="hero-stats">
+    <div class="stat-item"><div class="stat-val">6</div><div class="stat-label">Risk Grades</div></div>
+    <div class="stat-item"><div class="stat-val">500%</div><div class="stat-label">Max Return Mapped</div></div>
+    <div class="stat-item"><div class="stat-val">4</div><div class="stat-label">Risk Dimensions</div></div>
+    <div class="stat-item"><div class="stat-val">5</div><div class="stat-label">Protocol Integrations</div></div>
+  </div>
+</section>
+
+<!-- CALCULATOR SECTION -->
+<section id="calculator">
+  <div class="calc-header fade-up">
+    <div>
+      <div class="section-label">// Risk-Reward Matrix</div>
+      <h2>PLOT YOUR<br>POSITION</h2>
+    </div>
+    <p>Navigate the X-Y grid. X-axis maps risk from AAA (safest) to B (highest). Y-axis maps estimated annual return from 0% to 500%. Click any asset to inspect its profile.</p>
+  </div>
+
+  <div class="graph-wrapper fade-up">
+    <div class="graph-container">
+      <canvas id="riskChart" height="500"></canvas>
+      <div class="graph-legend">
+        <div class="legend-item"><div class="legend-dot" style="background:var(--teal)"></div>Staking</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--gold)"></div>Lending / Yield Farming</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#A78BFA"></div>Perp DEX (Hyperliquid)</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--red)"></div>Memecoin</div>
+      </div>
+    </div>
+
+    <div class="sidebar-panel">
+      <!-- Asset Type -->
+      <div class="panel-card fade-up">
+        <h4>// Filter by Asset Type</h4>
+        <div class="asset-select-group">
+          <button class="asset-btn active" onclick="filterAssets('all',this)">All Assets <span class="badge">14</span></button>
+          <button class="asset-btn" onclick="filterAssets('staking',this)">Staking <span class="badge">AAA–A</span></button>
+          <button class="asset-btn" onclick="filterAssets('lending',this)">Lending / Yield <span class="badge">AA–BBB</span></button>
+          <button class="asset-btn" onclick="filterAssets('perp',this)">Perp DEX <span class="badge">BB–B</span></button>
+          <button class="asset-btn" onclick="filterAssets('memecoin',this)">Memecoin <span class="badge">B</span></button>
+        </div>
+      </div>
+
+      <!-- Rating Key -->
+      <div class="panel-card fade-up">
+        <h4>// Rating Scale</h4>
+        <div class="rating-display">
+          <div class="rating-pill aaa">AAA</div>
+          <div class="rating-pill aa">AA</div>
+          <div class="rating-pill a">A</div>
+          <div class="rating-pill bbb">BBB</div>
+          <div class="rating-pill bb">BB</div>
+          <div class="rating-pill b">B</div>
+        </div>
+        <p style="margin-top:14px; font-family:'Space Mono',monospace; font-size:10px; color:var(--text2); line-height:1.7; letter-spacing:0.5px;">
+          AAA = Minimal risk, battle-tested<br>
+          AA  = Very low risk, highly reliable<br>
+          A   = Low risk, minor vulnerabilities<br>
+          BBB = Moderate, some conditions weaken<br>
+          BB  = Elevated, speculative elements<br>
+          B   = High risk, adverse conditions likely
+        </p>
+      </div>
+
+      <!-- Add Custom -->
+      <div class="panel-card fade-up">
+        <h4>// Add Custom Position</h4>
+        <label style="font-family:'Space Mono',monospace;font-size:10px;color:var(--text2);display:block;margin-bottom:6px;">ASSET NAME</label>
+        <input type="text" class="yield-input" id="customName" placeholder="e.g. AAVE USDC Pool" style="margin-bottom:12px;">
+        <label style="font-family:'Space Mono',monospace;font-size:10px;color:var(--text2);display:block;margin-bottom:6px;">EST. ANNUAL YIELD (%)</label>
+        <input type="number" class="yield-input" id="customYield" placeholder="e.g. 6.5" style="margin-bottom:12px;" min="0" max="500">
+        <label style="font-family:'Space Mono',monospace;font-size:10px;color:var(--text2);display:block;margin-bottom:6px;">RISK RATING</label>
+        <select class="yield-input" id="customRating" style="margin-bottom:8px;">
+          <option value="AAA">AAA — Minimal Risk</option>
+          <option value="AA">AA — Very Low</option>
+          <option value="A">A — Low</option>
+          <option value="BBB">BBB — Moderate</option>
+          <option value="BB">BB — Elevated</option>
+          <option value="B">B — High Risk</option>
+        </select>
+        <button class="add-btn" onclick="addCustomPoint()">+ Plot Position</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TOOLTIP -->
+<div class="graph-tooltip" id="graphTooltip">
+  <div class="tooltip-name" id="ttName"></div>
+  <div class="tooltip-row"><span>RATING</span><span id="ttRating"></span></div>
+  <div class="tooltip-row"><span>EST. YIELD</span><span id="ttYield"></span></div>
+  <div class="tooltip-row"><span>CATEGORY</span><span id="ttCategory"></span></div>
+  <div class="tooltip-row"><span>COINFELLO</span><span id="ttRec"></span></div>
+</div>
+
+<!-- RISK DIMENSIONS -->
+<section id="risk-dimensions">
+  <div class="section-label fade-up">// Risk Assessment Framework</div>
+  <h2 class="fade-up">FOUR DIMENSIONS<br>OF CRYPTO RISK</h2>
+  <div class="dimensions-grid">
+    <div class="dim-card fade-up">
+      <div class="dim-number">01</div>
+      <div class="dim-icon">💧</div>
+      <h3>Liquidity Risk</h3>
+      <p>Depth and stability of available liquidity. A pool that looks deep today can drain overnight in adverse conditions.</p>
+      <ul class="dim-signals">
+        <li>TVL vs. daily volume ratio</li>
+        <li>LP concentration risk</li>
+        <li>Withdrawal queue depth</li>
+        <li>Slippage at trade sizes</li>
+        <li>Protocol reserve ratio</li>
+      </ul>
+    </div>
+    <div class="dim-card fade-up">
+      <div class="dim-number">02</div>
+      <div class="dim-icon">🏦</div>
+      <h3>Seniorage Risk</h3>
+      <p>Token emission schedules, inflation mechanics, and treasury dilution that silently erode value over time.</p>
+      <ul class="dim-signals">
+        <li>Annual token emission rate</li>
+        <li>Vesting schedule exposure</li>
+        <li>Protocol Controlled Value</li>
+        <li>Governance mint/burn control</li>
+        <li>Token price vs. intrinsic value</li>
+      </ul>
+    </div>
+    <div class="dim-card fade-up">
+      <div class="dim-number">03</div>
+      <div class="dim-icon">⚡</div>
+      <h3>MEV Attack Risk</h3>
+      <p>Maximal Extractable Value exposure — sandwich attacks, front-running, and back-running that silently extract from your trades.</p>
+      <ul class="dim-signals">
+        <li>Private mempool / Flashbots protection</li>
+        <li>TWAP vs. spot oracle usage</li>
+        <li>Transaction ordering guarantees</li>
+        <li>Slippage tolerance config</li>
+        <li>Historical MEV extraction data</li>
+      </ul>
+    </div>
+    <div class="dim-card fade-up">
+      <div class="dim-number">04</div>
+      <div class="dim-icon">📉</div>
+      <h3>Dilution Risk</h3>
+      <p>Future supply expansion reducing per-token value. FDV vs. circulating cap discrepancies are a common trap.</p>
+      <ul class="dim-signals">
+        <li>FDV vs. circulating market cap</li>
+        <li>Upcoming unlock schedules</li>
+        <li>DAO supply governance proposals</li>
+        <li>Liquidity mining duration</li>
+        <li>Treasury token sell pressure</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- YIELD STRATEGIES -->
+<section id="yield-strategies">
+  <div class="section-label fade-up">// Yield Estimation Engine</div>
+  <h2 class="fade-up">THREE PATHS<br>TO YIELD</h2>
+  <div class="strategy-grid">
+    <div class="strategy-card fade-up">
+      <div class="strategy-type">Strategy 01</div>
+      <h3>Staking Rewards</h3>
+      <div class="apy-badge">2% – 4% APY</div>
+      <p>Native asset staking through validators or liquid staking protocols. The bedrock of crypto yield — low risk, predictable returns.</p>
+      <div class="protocol-tags">
+        <a href="https://docs.cdp.coinbase.com/prime/concepts/staking/staking" target="_blank" class="protocol-tag">Coinbase CDP ↗</a>
+        <span class="protocol-tag">ETH · SOL · MATIC</span>
+        <span class="protocol-tag">stETH · mSOL</span>
+      </div>
+    </div>
+    <div class="strategy-card fade-up">
+      <div class="strategy-type">Strategy 02</div>
+      <h3>Lending</h3>
+      <div class="apy-badge">4% – 7% APY</div>
+      <p>Supply assets to decentralized lending markets. Earn interest from borrowers while your capital stays composable and withdrawable.</p>
+      <div class="protocol-tags">
+        <a href="https://aave.com/docs" target="_blank" class="protocol-tag">Aave ↗</a>
+        <a href="https://docs.morpho.org/get-started/" target="_blank" class="protocol-tag">Morpho ↗</a>
+        <span class="protocol-tag">ETH · Base · Polygon</span>
+      </div>
+    </div>
+    <div class="strategy-card fade-up">
+      <div class="strategy-type">Strategy 03</div>
+      <h3>Yield Farming</h3>
+      <div class="apy-badge">4% – 7% APY</div>
+      <p>Provide liquidity to AMMs and participate in incentive programs. Higher ceiling, but impermanent loss and dilution risk require careful navigation.</p>
+      <div class="protocol-tags">
+        <a href="https://aave.com/docs" target="_blank" class="protocol-tag">Aave ↗</a>
+        <a href="https://docs.morpho.org/get-started/" target="_blank" class="protocol-tag">Morpho ↗</a>
+        <span class="protocol-tag">Caution: IL Risk</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MACRO -->
+<section id="macro">
+  <div class="section-label fade-up">// Global Macro Context</div>
+  <h2 class="fade-up">THE WORLD SHAPES<br>YOUR RETURNS</h2>
+  <p class="fade-up" style="color:var(--text2);font-size:16px;font-weight:300;max-width:560px;line-height:1.65;margin-top:12px;">Traditional finance shifts move through crypto liquidity in real time. We track what matters.</p>
+  <div class="macro-grid">
+    <div class="macro-card fade-up">
+      <div class="macro-indicator">
+        <div class="macro-dot positive"></div>
+        <div class="macro-tag">Gold Markets</div>
+      </div>
+      <h3>Gold at All-Time Highs</h3>
+      <p>Record gold prices signal investor flight to hard assets and inflation hedging. Historically correlated with Bitcoin's "digital gold" narrative — institutional allocation toward BTC often follows gold surges.</p>
+      <div class="macro-impact">
+        <span class="impact-arrow up">↑</span>
+        <span class="impact-label">BTC Liquidity Rating:</span>
+        <span class="impact-val">Positive +1 Notch</span>
+      </div>
+    </div>
+    <div class="macro-card fade-up">
+      <div class="macro-indicator">
+        <div class="macro-dot negative"></div>
+        <div class="macro-tag">Geopolitics</div>
+      </div>
+      <h3>Iran Conflict &amp; Regional Tensions</h3>
+      <p>Active armed conflict creates short-term crypto volatility but drives medium-term inflows as users in conflict zones seek censorship-resistant assets. Stablecoins and BTC see increased demand.</p>
+      <div class="macro-impact">
+        <span class="impact-arrow side">→</span>
+        <span class="impact-label">Altcoin Liquidity:</span>
+        <span class="impact-val">Heightened Volatility</span>
+      </div>
+    </div>
+    <div class="macro-card fade-up">
+      <div class="macro-indicator">
+        <div class="macro-dot negative"></div>
+        <div class="macro-tag">Energy Markets</div>
+      </div>
+      <h3>Oil Price Spike</h3>
+      <p>Rising oil prices increase global inflation, pressure central banks to maintain high rates, and reduce risk appetite. High rates tighten DeFi liquidity and reduce the relative attractiveness of crypto yield vs. TradFi instruments.</p>
+      <div class="macro-impact">
+        <span class="impact-arrow down">↓</span>
+        <span class="impact-label">DeFi Yield Attractiveness:</span>
+        <span class="impact-val">Compressed vs. TradFi</span>
+      </div>
+    </div>
+    <div class="macro-card fade-up">
+      <div class="macro-indicator">
+        <div class="macro-dot neutral"></div>
+        <div class="macro-tag">DePIN / AI Race</div>
+      </div>
+      <h3>Helium &amp; the AI Compute Race</h3>
+      <p>Helium's decentralized wireless infrastructure is gaining relevance in the AI compute and IoT data collection race, highlighting the DePIN sector. AI-driven compute demand is creating powerful new crypto utility narratives.</p>
+      <div class="macro-impact">
+        <span class="impact-arrow up">↑</span>
+        <span class="impact-label">DePIN Opportunity Signal:</span>
+        <span class="impact-val">Emerging — Proceed with Care</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TRADING TOOLS -->
+<section id="trading-tools">
+  <div class="section-label fade-up">// Execution Toolkit</div>
+  <h2 class="fade-up">RIGHT TOOL.<br>RIGHT TRADE.</h2>
+  <div class="tools-grid">
+    <div class="tool-card fade-up">
+      <div class="watermark">PERP</div>
+      <div class="tool-type">Perpetual DEX</div>
+      <h3>Hyperliquid</h3>
+      <div class="risk-default">⚠ Default Rating: BB – B (leveraged)</div>
+      <p>For leveraged perpetual futures exposure, Coinfello integrates Hyperliquid — a decentralized exchange with on-chain order books, deep liquidity, and low-latency execution. Long, short, cross-margin, isolated.</p>
+      <a href="https://hyperliquid.gitbook.io/hyperliquid-docs" target="_blank" class="tool-link">Read the Docs ↗</a>
+    </div>
+    <div class="tool-card fade-up">
+      <div class="watermark">MEME</div>
+      <div class="tool-type">Memecoin Trading</div>
+      <h3>Bonk Bot</h3>
+      <div class="risk-default">⚠ Default Rating: B (all dimensions)</div>
+      <p>Memecoin exposure requires speed, not spreadsheets. Coinfello routes memecoin traders to Bonk Bot — a Telegram-based execution tool for fast Solana memecoin trades. All memecoin positions carry a B composite rating.</p>
+      <a href="https://docs.bonkbot.io/" target="_blank" class="tool-link">Open Bonk Bot ↗</a>
+    </div>
+  </div>
+</section>
+
+<!-- SIGNUP / CTA -->
+<section id="signup">
+  <div class="orb-cta"></div>
+  <div class="section-label fade-up">// Your Coinfello Agent</div>
+  <h2 class="fade-up">READY TO MAKE<br><span style="color:var(--gold)">SMARTER MONEY?</span></h2>
+  <p class="sub fade-up">This calculator is just the starting point. Your Coinfello agent goes deeper — analyzing your portfolio, tracking macro shifts, and surfacing opportunities before the market moves.</p>
+
+  <form class="signup-form fade-up" onsubmit="handleSignup(event)">
+    <input type="email" id="emailInput" placeholder="your@email.com" required>
+    <button type="submit">Get Access</button>
+  </form>
+
+  <div class="signup-features fade-up">
+    <div class="signup-feature">White glove onboarding</div>
+    <div class="signup-feature">Real-time risk alerts</div>
+    <div class="signup-feature">Macro intelligence feed</div>
+    <div class="signup-feature">Protocol yield monitoring</div>
+  </div>
+
+  <div class="agent-prompt fade-up">
+    <div class="terminal-bar"><span></span><span></span><span></span></div>
+    <div class="terminal-line"><span class="prompt">coinfello@agent:~$ </span><span class="output">What is the safest 5% yield in DeFi right now?</span></div>
+    <div class="terminal-line" style="margin-left:20px;color:var(--teal);">→ Scanning Aave v3 on Base: USDC supply APY 5.2% — Rating AA</div>
+    <div class="terminal-line" style="margin-left:20px;color:var(--teal);">→ Morpho USDC vault (Base): 5.8% APY — Rating AA</div>
+    <div class="terminal-line" style="margin-left:20px;color:var(--teal);">→ Macro flag: Oil spike compressed risk appetite — prefer stablecoins</div>
+    <div class="terminal-line" style="margin-left:20px;color:var(--gold);">✦ Recommendation: Morpho USDC Base Vault — best risk-adjusted yield this week</div>
+    <div class="terminal-line"><span class="prompt">coinfello@agent:~$ </span><span class="cursor"></span></div>
+    <div class="agent-cta-row">
+      <p>This is what a conversation with your <strong>Coinfello agent</strong> looks like. Sign up above to unlock yours — ask anything, anytime.</p>
+      <a href="#signup" class="btn-primary" style="white-space:nowrap">Start Now</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <a href="#" class="logo">COINFELLO<span>WHITE GLOVE CRYPTO INTELLIGENCE</span></a>
+  <p class="disclaimer">This tool is for informational purposes only and does not constitute financial advice. Crypto investments carry significant risk including total loss of capital. Past performance is not indicative of future results.</p>
+  <p>© 2026 COINFELLO.COM</p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script>
+// ─── TICKER ───
+const tickerData = [
+  { sym: 'BTC', val: '$87,420', chg: '+2.4%', up: true },
+  { sym: 'ETH', val: '$3,210', chg: '+1.8%', up: true },
+  { sym: 'SOL', val: '$142.50', chg: '-0.6%', up: false },
+  { sym: 'GOLD', val: '$3,180/oz', chg: '+0.9%', up: true },
+  { sym: 'OIL (WTI)', val: '$91.20', chg: '+3.1%', up: false },
+  { sym: 'AAVE APY', val: '5.2%', chg: 'USDC', up: true },
+  { sym: 'ETH STAKE', val: '3.8% APY', chg: 'AA', up: true },
+  { sym: 'HNT', val: '$6.20', chg: '+12%', up: true },
+  { sym: 'MORPHO', val: '5.8%', chg: 'Base USDC', up: true },
+  { sym: 'BTC DOM', val: '58.4%', chg: '+0.3%', up: true },
+];
+const track = document.getElementById('tickerTrack');
+const full = [...tickerData, ...tickerData];
+track.innerHTML = full.map(d =>
+  `<span class="ticker-item">${d.sym} <strong>${d.val}</strong> <span class="${d.up ? 'up':'dn'}">${d.chg}</span></span>`
+).join('');
+
+// ─── GRAPH DATA ───
+const ratingToX = { 'AAA': 0, 'AA': 1, 'A': 2, 'BBB': 3, 'BB': 4, 'B': 5 };
+const ratingLabels = ['AAA', 'AA', 'A', 'BBB', 'BB', 'B'];
+
+const assetData = [
+  // STAKING
+  { name: 'ETH Staking (stETH)', rating: 'AAA', yield: 3.8, category: 'staking', rec: 'FAVORABLE' },
+  { name: 'SOL Staking (mSOL)',  rating: 'AA',  yield: 6.5, category: 'staking', rec: 'FAVORABLE' },
+  { name: 'MATIC Staking',       rating: 'AA',  yield: 4.2, category: 'staking', rec: 'FAVORABLE' },
+  // LENDING
+  { name: 'Aave USDC (ETH)',     rating: 'AA',  yield: 5.1, category: 'lending', rec: 'FAVORABLE' },
+  { name: 'Morpho USDC (Base)',  rating: 'AA',  yield: 5.8, category: 'lending', rec: 'FAVORABLE' },
+  { name: 'Aave WBTC',           rating: 'A',   yield: 4.5, category: 'lending', rec: 'FAVORABLE' },
+  { name: 'Morpho Blue WETH',    rating: 'BBB', yield: 7.2, category: 'lending', rec: 'CAUTION' },
+  // YIELD FARMING
+  { name: 'Aave Yield Farm',     rating: 'BBB', yield: 9.5, category: 'lending', rec: 'CAUTION' },
+  { name: 'Morpho Vault ETH',    rating: 'A',   yield: 6.8, category: 'lending', rec: 'FAVORABLE' },
+  // PERPS
+  { name: 'HL BTC-PERP 2x',     rating: 'BB',  yield: 45,  category: 'perp', rec: 'CAUTION' },
+  { name: 'HL ETH-PERP 3x',     rating: 'BB',  yield: 80,  category: 'perp', rec: 'CAUTION' },
+  { name: 'HL SOL-PERP 5x',     rating: 'B',   yield: 180, category: 'perp', rec: 'AVOID' },
+  // MEMECOINS
+  { name: 'BONK (via Bot)',      rating: 'B',   yield: 320, category: 'memecoin', rec: 'AVOID' },
+  { name: 'WIF (via Bot)',       rating: 'B',   yield: 500, category: 'memecoin', rec: 'AVOID' },
+];
+
+const catColors = {
+  staking:  '#00E5C4',
+  lending:  '#F0B429',
+  perp:     '#A78BFA',
+  memecoin: '#FF4D6D',
+};
+
+let activeFilter = 'all';
+let chart;
+
+function buildChartData(filter) {
+  const filtered = filter === 'all' ? assetData : assetData.filter(d => d.category === filter);
+  return filtered.map(d => ({
+    x: ratingToX[d.rating],
+    y: d.yield,
+    label: d.name,
+    rating: d.rating,
+    category: d.category,
+    rec: d.rec,
+    backgroundColor: catColors[d.category],
+    borderColor: catColors[d.category],
+  }));
+}
+
+function initChart() {
+  const ctx = document.getElementById('riskChart').getContext('2d');
+
+  // Gradient bands
+  const gradientLow = ctx.createLinearGradient(0, 0, 800, 0);
+  gradientLow.addColorStop(0, 'rgba(0,229,196,0.04)');
+  gradientLow.addColorStop(0.4, 'rgba(0,229,196,0.01)');
+  gradientLow.addColorStop(1, 'transparent');
+
+  const points = buildChartData('all');
+
+  chart = new Chart(ctx, {
+    type: 'scatter',
+    data: {
+      datasets: [{
+        data: points,
+        pointRadius: points.map(p => p.category === 'memecoin' ? 10 : p.category === 'perp' ? 9 : 8),
+        pointHoverRadius: 13,
+        pointBackgroundColor: points.map(p => p.backgroundColor),
+        pointBorderColor: points.map(p => p.borderColor),
+        pointBorderWidth: 2,
+      }]
+    },
+    options: {
+      responsive: true,
+      animation: { duration: 600, easing: 'easeOutQuart' },
+      plugins: {
+        legend: { display: false },
+        tooltip: { enabled: false },
+      },
+      scales: {
+        x: {
+          min: -0.4,
+          max: 5.6,
+          title: {
+            display: true,
+            text: 'RISK RATING  →  (AAA = Safest, B = Highest Risk)',
+            color: '#8892A8',
+            font: { family: 'Space Mono', size: 10 },
+            padding: 16,
+          },
+          ticks: {
+            color: '#8892A8',
+            font: { family: 'Space Mono', size: 11 },
+            stepSize: 1,
+            callback: v => ratingLabels[Math.round(v)] || '',
+          },
+          grid: {
+            color: 'rgba(255,255,255,0.05)',
+            drawBorder: false,
+          },
+          border: { color: 'rgba(255,255,255,0.08)' },
+        },
+        y: {
+          min: 0,
+          max: 520,
+          title: {
+            display: true,
+            text: 'ESTIMATED ANNUAL RETURN (%)  →',
+            color: '#8892A8',
+            font: { family: 'Space Mono', size: 10 },
+            padding: 16,
+          },
+          ticks: {
+            color: '#8892A8',
+            font: { family: 'Space Mono', size: 11 },
+            callback: v => v + '%',
+            stepSize: 100,
+          },
+          grid: { color: 'rgba(255,255,255,0.05)', drawBorder: false },
+          border: { color: 'rgba(255,255,255,0.08)' },
+        }
+      }
+    }
+  });
+
+  // Hover tooltip
+  const canvas = document.getElementById('riskChart');
+  const tooltip = document.getElementById('graphTooltip');
+
+  canvas.addEventListener('mousemove', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const pts = chart.getElementsAtEventForMode(e, 'nearest', { intersect: false, radius: 20 }, false);
+
+    if (pts.length > 0) {
+      const idx = pts[0].index;
+      const raw = chart.data.datasets[0].data[idx];
+      document.getElementById('ttName').textContent = raw.label;
+      document.getElementById('ttRating').textContent = raw.rating;
+      document.getElementById('ttYield').textContent = raw.y + '% est. APY';
+      document.getElementById('ttCategory').textContent = raw.category.toUpperCase();
+      document.getElementById('ttRec').textContent = raw.rec;
+      document.getElementById('ttRec').style.color = raw.rec === 'FAVORABLE' ? 'var(--teal)' : raw.rec === 'CAUTION' ? 'var(--gold)' : 'var(--red)';
+      tooltip.style.display = 'block';
+      tooltip.style.left = (e.clientX + 16) + 'px';
+      tooltip.style.top  = (e.clientY - 60) + 'px';
+      canvas.style.cursor = 'pointer';
+    } else {
+      tooltip.style.display = 'none';
+      canvas.style.cursor = 'crosshair';
+    }
+  });
+
+  canvas.addEventListener('mouseleave', () => {
+    tooltip.style.display = 'none';
+  });
+}
+
+function filterAssets(type, btn) {
+  activeFilter = type;
+  document.querySelectorAll('.asset-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const pts = buildChartData(type);
+  chart.data.datasets[0].data = pts;
+  chart.data.datasets[0].pointRadius = pts.map(p => p.category === 'memecoin' ? 10 : p.category === 'perp' ? 9 : 8);
+  chart.data.datasets[0].pointBackgroundColor = pts.map(p => p.backgroundColor);
+  chart.data.datasets[0].pointBorderColor = pts.map(p => p.borderColor);
+  chart.update();
+}
+
+function addCustomPoint() {
+  const name = document.getElementById('customName').value.trim();
+  const yld  = parseFloat(document.getElementById('customYield').value);
+  const rating = document.getElementById('customRating').value;
+
+  if (!name || isNaN(yld)) { alert('Please fill in asset name and yield.'); return; }
+  if (yld < 0 || yld > 500) { alert('Yield must be between 0% and 500%.'); return; }
+
+  const newPoint = {
+    x: ratingToX[rating],
+    y: yld,
+    label: name + ' (Custom)',
+    rating,
+    category: 'custom',
+    rec: yld > 50 ? 'AVOID' : yld > 10 ? 'CAUTION' : 'FAVORABLE',
+    backgroundColor: '#E879F9',
+    borderColor: '#E879F9',
+  };
+
+  chart.data.datasets[0].data.push(newPoint);
+  const newRadii = [...chart.data.datasets[0].pointRadius, 10];
+  chart.data.datasets[0].pointRadius = newRadii;
+  chart.data.datasets[0].pointBackgroundColor.push('#E879F9');
+  chart.data.datasets[0].pointBorderColor.push('#E879F9');
+  chart.update();
+
+  document.getElementById('customName').value = '';
+  document.getElementById('customYield').value = '';
+}
+
+// ─── SCROLL FADE ───
+const obs = new IntersectionObserver((entries) => {
+  entries.forEach((e, i) => {
+    if (e.isIntersecting) {
+      setTimeout(() => e.target.classList.add('visible'), i * 80);
+    }
+  });
+}, { threshold: 0.1 });
+document.querySelectorAll('.fade-up').forEach(el => obs.observe(el));
+
+// ─── SIGNUP ───
+function handleSignup(e) {
+  e.preventDefault();
+  const email = document.getElementById('emailInput').value;
+  const btn = e.target.querySelector('button');
+  btn.textContent = '✓ You\'re on the list';
+  btn.style.background = 'var(--teal)';
+  btn.style.color = '#000';
+  setTimeout(() => {
+    btn.textContent = 'Get Access';
+    btn.style.background = 'var(--gold)';
+    btn.style.color = '#000';
+    document.getElementById('emailInput').value = '';
+  }, 4000);
+}
+
+// ─── INIT ───
+window.addEventListener('load', initChart);
+</script>
+</body>
+</html>
