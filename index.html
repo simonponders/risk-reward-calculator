@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Coinfello — Risk/Reward Intelligence</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Bebas+Neue&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
     --bg: #060810;
@@ -29,7 +29,7 @@
   body {
     background: var(--bg);
     color: var(--text);
-    font-family: 'DM Sans', sans-serif;
+    font-family: 'Poppins', sans-serif;
     overflow-x: hidden;
     cursor: default;
   }
@@ -59,13 +59,12 @@
   }
 
   .logo {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 28px;
-    letter-spacing: 3px;
-    color: var(--gold);
+    display: flex;
+    align-items: center;
     text-decoration: none;
   }
-  .logo span { color: var(--text2); font-size: 11px; font-family: 'Space Mono', monospace; display: block; letter-spacing: 2px; margin-top: -4px; }
+  .logo img { height: 32px; width: auto; filter: brightness(0) invert(1); }
+  .logo span { display: none; }
 
   .nav-links { display: flex; gap: 32px; align-items: center; }
   .nav-links a { color: var(--text2); text-decoration: none; font-size: 13px; letter-spacing: 0.5px; transition: color 0.2s; }
@@ -98,11 +97,12 @@
   .hero-grid-bg {
     position: absolute;
     inset: 0;
-    background-image:
-      linear-gradient(rgba(240,180,41,0.04) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(240,180,41,0.04) 1px, transparent 1px);
-    background-size: 60px 60px;
-    mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 40%, transparent 100%);
+    background-image: url('https://www.coinfello.com/illustration-bg.svg');
+    background-size: cover;
+    background-position: center right;
+    background-repeat: no-repeat;
+    opacity: 0.18;
+    mask-image: radial-gradient(ellipse 90% 90% at 60% 50%, black 30%, transparent 100%);
   }
 
   .hero-orb {
@@ -751,7 +751,7 @@
     border: 1px solid var(--muted);
     border-right: none;
     color: var(--text);
-    font-family: 'DM Sans', sans-serif;
+    font-family: 'Poppins', sans-serif;
     font-size: 15px;
     padding: 16px 20px;
     outline: none;
@@ -861,7 +861,7 @@
     flex-wrap: wrap;
     gap: 16px;
   }
-  footer .logo { font-size: 20px; }
+  footer .logo img { height: 24px; }
   footer p { font-family: 'Space Mono', monospace; font-size: 10px; color: var(--text2); letter-spacing: 1px; }
   footer .disclaimer { font-size: 10px; color: var(--muted); font-family: 'Space Mono', monospace; max-width: 500px; line-height: 1.6; }
 
@@ -914,7 +914,7 @@
 
 <!-- NAV -->
 <nav>
-  <a href="#" class="logo">COINFELLO<span>WHITE GLOVE CRYPTO INTELLIGENCE</span></a>
+  <a href="#" class="logo"><img src="https://www.coinfello.com/CoinFello-logo-no-icon.svg" alt="CoinFello"><span>WHITE GLOVE CRYPTO INTELLIGENCE</span></a>
   <div class="nav-links">
     <a href="#calculator">Calculator</a>
     <a href="#risk-dimensions">Risk Ratings</a>
@@ -1258,7 +1258,7 @@
 
 <!-- FOOTER -->
 <footer>
-  <a href="#" class="logo">COINFELLO<span>WHITE GLOVE CRYPTO INTELLIGENCE</span></a>
+  <a href="#" class="logo"><img src="https://www.coinfello.com/CoinFello-logo-no-icon.svg" alt="CoinFello"><span>WHITE GLOVE CRYPTO INTELLIGENCE</span></a>
   <p class="disclaimer">This tool is for informational purposes only and does not constitute financial advice. Crypto investments carry significant risk including total loss of capital. Past performance is not indicative of future results.</p>
   <p>© 2026 COINFELLO.COM</p>
 </footer>
