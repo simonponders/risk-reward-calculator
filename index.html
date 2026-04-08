@@ -5,21 +5,22 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Coinfello — Risk/Reward Intelligence</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Bebas+Neue&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #060810;
-    --bg2: #0c1020;
-    --bg3: #111827;
-    --gold: #F0B429;
-    --gold2: #FFD97D;
+    --bg: #000000;
+    --bg2: #0d0d00;
+    --bg3: #111100;
+    --gold: #FFEE00;
+    --gold2: #FFF59D;
+    --beige: #EDE0C4;
     --teal: #00E5C4;
     --red: #FF4D6D;
-    --muted: #3a4460;
-    --text: #E8EDF5;
-    --text2: #8892A8;
-    --border: rgba(240,180,41,0.18);
-    --glow: rgba(240,180,41,0.12);
+    --muted: #3a3a20;
+    --text: #F5EDD5;
+    --text2: #A89E7A;
+    --border: rgba(255,238,0,0.18);
+    --glow: rgba(255,238,0,0.12);
   }
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -29,7 +30,7 @@
   body {
     background: var(--bg);
     color: var(--text);
-    font-family: 'DM Sans', sans-serif;
+    font-family: 'Poppins', sans-serif;
     overflow-x: hidden;
     cursor: default;
   }
@@ -54,22 +55,21 @@
     align-items: center;
     justify-content: space-between;
     padding: 20px 48px;
-    background: linear-gradient(to bottom, rgba(6,8,16,0.95), transparent);
-    backdrop-filter: blur(4px);
+    background: #FDFDE1;
+    backdrop-filter: none;
   }
 
   .logo {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 28px;
-    letter-spacing: 3px;
-    color: var(--gold);
+    display: flex;
+    align-items: center;
     text-decoration: none;
   }
-  .logo span { color: var(--text2); font-size: 11px; font-family: 'Space Mono', monospace; display: block; letter-spacing: 2px; margin-top: -4px; }
+  .logo img { height: 32px; width: auto; filter: brightness(0); }
+  .logo span { display: none; }
 
   .nav-links { display: flex; gap: 32px; align-items: center; }
-  .nav-links a { color: var(--text2); text-decoration: none; font-size: 13px; letter-spacing: 0.5px; transition: color 0.2s; }
-  .nav-links a:hover { color: var(--gold); }
+  .nav-links a { color: #333; text-decoration: none; font-size: 13px; letter-spacing: 0.5px; transition: color 0.2s; }
+  .nav-links a:hover { color: #000; }
   .nav-cta {
     background: var(--gold);
     color: #000;
@@ -93,26 +93,63 @@
     padding: 120px 48px 60px;
     position: relative;
     overflow: hidden;
+    background: #FEFBD0;
   }
 
-  .hero-grid-bg {
+  /* ─── PARALLAX LAYERS ─── */
+  .parallax-scene {
     position: absolute;
     inset: 0;
-    background-image:
-      linear-gradient(rgba(240,180,41,0.04) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(240,180,41,0.04) 1px, transparent 1px);
-    background-size: 60px 60px;
-    mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 40%, transparent 100%);
-  }
-
-  .hero-orb {
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(120px);
+    overflow: hidden;
     pointer-events: none;
   }
-  .orb1 { width: 600px; height: 600px; background: rgba(240,180,41,0.08); top: -100px; right: -100px; }
-  .orb2 { width: 400px; height: 400px; background: rgba(0,229,196,0.06); bottom: 0; left: 200px; }
+
+  .parallax-layer {
+    position: absolute;
+    will-change: transform;
+  }
+
+  .layer-sun {
+    width: 70px;
+    top: 8%;
+    right: 8%;
+    opacity: 0.95;
+  }
+
+  .layer-cloud2 {
+    width: 90px;
+    top: 22%;
+    right: 3%;
+    opacity: 0.85;
+  }
+
+  .layer-cloud1 {
+    width: 80px;
+    top: 30%;
+    right: 18%;
+    opacity: 0.9;
+  }
+
+  @media (min-width: 768px) {
+    .layer-sun { width: 90px; right: 12%; }
+    .layer-cloud2 { width: 90px; right: 5%; }
+    .layer-cloud1 { width: 80px; right: 28%; }
+  }
+
+  .layer-landscape {
+    width: 100%;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    object-fit: cover;
+    object-position: bottom center;
+    opacity: 0.75;
+    mask-image: linear-gradient(to bottom, transparent 0%, black 30%);
+  }
+
+  /* Keep orb divs in markup but hide them */
+  .hero-orb { display: none; }
+  .hero-grid-bg { display: none; }
 
   .hero-eyebrow {
     font-family: 'Space Mono', monospace;
@@ -138,16 +175,17 @@
     letter-spacing: 2px;
     max-width: 900px;
     margin-bottom: 28px;
+    color: #000;
   }
-  h1 .gold { color: var(--gold); }
+  h1 .gold { color: #EFBF04; }
   h1 .outline {
-    -webkit-text-stroke: 1px var(--text);
+    -webkit-text-stroke: 1px #000;
     color: transparent;
   }
 
   .hero-sub {
     max-width: 520px;
-    color: var(--text2);
+    color: #000;
     font-size: 17px;
     line-height: 1.65;
     margin-bottom: 44px;
@@ -751,7 +789,7 @@
     border: 1px solid var(--muted);
     border-right: none;
     color: var(--text);
-    font-family: 'DM Sans', sans-serif;
+    font-family: 'Poppins', sans-serif;
     font-size: 15px;
     padding: 16px 20px;
     outline: none;
@@ -861,7 +899,7 @@
     flex-wrap: wrap;
     gap: 16px;
   }
-  footer .logo { font-size: 20px; }
+  footer .logo img { height: 24px; }
   footer p { font-family: 'Space Mono', monospace; font-size: 10px; color: var(--text2); letter-spacing: 1px; }
   footer .disclaimer { font-size: 10px; color: var(--muted); font-family: 'Space Mono', monospace; max-width: 500px; line-height: 1.6; }
 
@@ -914,7 +952,7 @@
 
 <!-- NAV -->
 <nav>
-  <a href="#" class="logo">COINFELLO<span>WHITE GLOVE CRYPTO INTELLIGENCE</span></a>
+  <a href="#" class="logo"><img src="https://www.coinfello.com/CoinFello-logo-no-icon.svg" alt="CoinFello"><span>WHITE GLOVE CRYPTO INTELLIGENCE</span></a>
   <div class="nav-links">
     <a href="#calculator">Calculator</a>
     <a href="#risk-dimensions">Risk Ratings</a>
@@ -931,9 +969,12 @@
 
 <!-- HERO -->
 <section class="hero" style="padding-top: 140px;">
-  <div class="hero-grid-bg"></div>
-  <div class="hero-orb orb1"></div>
-  <div class="hero-orb orb2"></div>
+  <div class="parallax-scene">
+    <img class="parallax-layer layer-sun" data-speed="0.15" src="sun.png" alt="">
+    <img class="parallax-layer layer-cloud2" data-speed="0.25" src="cloud2.png" alt="">
+    <img class="parallax-layer layer-cloud1" data-speed="0.35" src="cloud1.png" alt="">
+    <img class="parallax-layer layer-landscape" data-speed="0.5" src="landscape.png" alt="">
+  </div>
 
   <div class="hero-eyebrow">Risk / Reward Intelligence</div>
   <h1>KNOW YOUR<br><span class="gold">RISK.</span><br><span class="outline">KNOW YOUR</span><br>RETURN.</h1>
@@ -1258,7 +1299,7 @@
 
 <!-- FOOTER -->
 <footer>
-  <a href="#" class="logo">COINFELLO<span>WHITE GLOVE CRYPTO INTELLIGENCE</span></a>
+  <a href="#" class="logo"><img src="https://www.coinfello.com/CoinFello-logo-no-icon.svg" alt="CoinFello"><span>WHITE GLOVE CRYPTO INTELLIGENCE</span></a>
   <p class="disclaimer">This tool is for informational purposes only and does not constitute financial advice. Crypto investments carry significant risk including total loss of capital. Past performance is not indicative of future results.</p>
   <p>© 2026 COINFELLO.COM</p>
 </footer>
@@ -1512,6 +1553,19 @@ function handleSignup(e) {
 
 // ─── INIT ───
 window.addEventListener('load', initChart);
+
+// ─── PARALLAX ───
+(function() {
+  const layers = document.querySelectorAll('.parallax-layer');
+  function onScroll() {
+    const y = window.scrollY;
+    layers.forEach(el => {
+      const speed = parseFloat(el.dataset.speed) || 0.2;
+      el.style.transform = `translateY(${y * speed}px)`;
+    });
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+})();
 </script>
 </body>
 </html>
